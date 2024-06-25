@@ -6,37 +6,47 @@ import (
 	"reflect"
 
 	"cloud.google.com/go/vertexai/genai"
+	generativeAi "github.com/google/generative-ai-go/genai"
+
 	"google.golang.org/api/option"
 )
 
-// Options is a set of options for GoogleAI and Vertex clients.
+const (
+	MimeTypeTextPlain       = "text/plain"
+	MimeTypeApplicationJSON = "application/json"
+)
+
+// Options is a set of options for GoogleAI and Vertex clients
 type Options struct {
-	CloudProject          string
-	CloudLocation         string
-	DefaultModel          string
-	DefaultEmbeddingModel string
-	DefaultCandidateCount int
-	DefaultMaxTokens      int
-	DefaultTemperature    float64
-	DefaultTopK           int
-	DefaultTopP           float64
-	HarmThreshold         HarmBlockThreshold
+	CloudProject            string
+	CloudLocation           string
+	DefaultModel            string
+	DefaultEmbeddingModel   string
+	DefaultCandidateCount   int
+	DefaultMaxTokens        int
+	DefaultTemperature      float64
+	DefaultTopK             int
+	DefaultTopP             float64
+	HarmThreshold           HarmBlockThreshold
+	DefaultResponseMimeType string
+	DefaultResponseSchema   *generativeAi.Schema
 
 	ClientOptions []option.ClientOption
 }
 
 func DefaultOptions() Options {
 	return Options{
-		CloudProject:          "",
-		CloudLocation:         "",
-		DefaultModel:          "gemini-pro",
-		DefaultEmbeddingModel: "embedding-001",
-		DefaultCandidateCount: 1,
-		DefaultMaxTokens:      2048,
-		DefaultTemperature:    0.5,
-		DefaultTopK:           3,
-		DefaultTopP:           0.95,
-		HarmThreshold:         HarmBlockOnlyHigh,
+		CloudProject:            "",
+		CloudLocation:           "",
+		DefaultModel:            "gemini-pro",
+		DefaultEmbeddingModel:   "embedding-001",
+		DefaultCandidateCount:   1,
+		DefaultMaxTokens:        2048,
+		DefaultTemperature:      0.5,
+		DefaultTopK:             3,
+		DefaultTopP:             0.95,
+		HarmThreshold:           HarmBlockOnlyHigh,
+		DefaultResponseMimeType: "text/plain",
 	}
 }
 
@@ -171,6 +181,26 @@ func WithDefaultTopP(defaultTopP float64) Option {
 func WithHarmThreshold(ht HarmBlockThreshold) Option {
 	return func(opts *Options) {
 		opts.HarmThreshold = ht
+	}
+}
+
+// WithResponseMimeType sets the supported response output formats.
+// Currently, text/plain and application/json are supported.
+func WithResponseMimeType(responseMimeType string) Option {
+	return func(opts *Options) {
+		if responseMimeType != MimeTypeTextPlain && responseMimeType != MimeTypeApplicationJSON {
+			return
+		}
+		opts.DefaultResponseMimeType = responseMimeType
+	}
+}
+
+// WithResponseSchema sets the schema for output,
+// defaultResponseMimeType should be set accordingly
+func WithResponseSchema(responseSchema *generativeAi.Schema) Option {
+	return func(opts *Options) {
+		opts.DefaultResponseSchema = responseSchema
+		opts.DefaultResponseMimeType = MimeTypeApplicationJSON
 	}
 }
 

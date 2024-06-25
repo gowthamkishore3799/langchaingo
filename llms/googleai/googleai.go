@@ -64,6 +64,8 @@ func (g *GoogleAI) GenerateContent(
 	model.SetTopP(float32(opts.TopP))
 	model.SetTopK(int32(opts.TopK))
 	model.StopSequences = opts.StopWords
+	model.ResponseMIMEType = g.opts.DefaultResponseMimeType
+	model.ResponseSchema = g.opts.DefaultResponseSchema
 	model.SafetySettings = []*genai.SafetySetting{
 		{
 			Category:  genai.HarmCategoryDangerousContent,
